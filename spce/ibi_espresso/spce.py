@@ -20,7 +20,7 @@ def calc_temperature(system):
     return 2./3. * E / n_part
 
 #check for necessary feature
-required_features=["MASS", "TABULATED", "ELECTROSTATICS"]
+required_features=["MASS", "TABULATED"]
 espressomd.assert_features(required_features)
 
 print("Program Information:\n{}\n".format(espressomd.features()))
@@ -48,16 +48,18 @@ print("number of particles: ", len(system.part))
 print("box size: ", box_length)
 print("initial temperature: ", calc_temperature(system))
 
-#with open('CG_CG.tab', 'r') as f:
-#    energy_tab, force_tab, min_r, max_r=<Do something here>
-energy_tab = np.linspace(1., 0., 10)
-force_tab = 0.1 * np.ones((10,))
-min_r = 0.
-max_r = 1.
+with open('CG_CG.tab', 'r') as f:
+	data = np.loadtxt(f)
+	r = data[:, 0]
+	f = data[:, 1]
+	p = data[:, 2]
 
-system.non_bonded_inter[0,0].tabulated.set_params(min=min_r, max=max_r,
-                                                  energy=energy_tab,
-                                                  force=force_tab)
+	min_r = np.min(r)
+	max_r = np.max(r)
+
+	system.non_bonded_inter[0,0].tabulated.set_params(min=min_r, max=max_r,
+        	                                          energy=p,
+                	                                  force=f)
 
 # Warmup loop
 for i in range(eq_steps):
