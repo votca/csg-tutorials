@@ -6,6 +6,7 @@ import espressomd
 from espressomd.io.writer import h5md
 import MDAnalysis as mda
 
+
 def write_data(file_name, time, energy, n_part):
     with open(file_name, 'a') as f:
         e = energy['total'] / n_part
@@ -13,14 +14,15 @@ def write_data(file_name, time, energy, n_part):
         e_kin = e - e_pot
         print(" {} {} {} {}".format(time, e, e_pot, e_kin), file=f)
 
+
 def calc_temperature(system):
     E = system.analysis.energy()['total']
     n_part = len(system.part)
 
-    return 2./3. * E / n_part
+    return 2. / 3. * E / n_part
 
-#check for necessary feature
-required_features=["MASS", "TABULATED"]
+# check for necessary feature
+required_features = ["MASS", "TABULATED"]
 espressomd.assert_features(required_features)
 
 print("Program Information:\n{}\n".format(espressomd.features()))
@@ -49,17 +51,17 @@ print("box size: ", box_length)
 print("initial temperature: ", calc_temperature(system))
 
 with open('CG_CG.tab', 'r') as f:
-	data = np.loadtxt(f)
-	r = data[:, 0]
-	f = data[:, 1]
-	p = data[:, 2]
+    data = np.loadtxt(f)
+    r = data[:, 0]
+    f = data[:, 1]
+    p = data[:, 2]
 
-	min_r = np.min(r)
-	max_r = np.max(r)
+    min_r = np.min(r)
+    max_r = np.max(r)
 
-	system.non_bonded_inter[0,0].tabulated.set_params(min=min_r, max=max_r,
-        	                                          energy=p,
-                	                                  force=f)
+    system.non_bonded_inter[0, 0].tabulated.set_params(min=min_r, max=max_r,
+                                                       energy=p,
+                                                       force=f)
 
 # Warmup loop
 for i in range(eq_steps):
@@ -82,12 +84,12 @@ for i in range(int_steps):
     print("time: {:.3f} potential energy: {:.2f}".format(i * time_step, e_pot))
 
     h5_file.write()
-    write_data("energy.dat", i * time_step, system.analysis.energy(), len(system.part))
+    write_data("energy.dat", i * time_step,
+               system.analysis.energy(), len(system.part))
 
 endtime = time.time()
 h5_file.close()
 
-print("time per MD step: ", 1000. * (endtime - starttime) / int_steps , "ms")
+print("time per MD step: ", 1000. * (endtime - starttime) / int_steps, "ms")
 print("final temperature: ", calc_temperature(system))
 print("Finished.")
-
