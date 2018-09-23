@@ -33,6 +33,7 @@ time_step = 0.002
 friction = 5.0
 int_steps = 900
 eq_steps = 100
+steps_per_int = 100
 
 in_atoms = mda.Universe('spce.gro')
 box_length = in_atoms.dimensions[0:3].astype(float)
@@ -66,7 +67,7 @@ with open('CG_CG.tab', 'r') as f:
 # Warmup loop
 for i in range(eq_steps):
     print("warmup step", i)
-    system.integrator.run(100)
+    system.integrator.run(steps_per_int)
 
 print("Running at temperature T={:.2f}".format(calc_temperature(system)))
 
@@ -77,7 +78,7 @@ starttime = time.time()
 
 # Integration loop
 for i in range(int_steps):
-    system.integrator.run(100)
+    system.integrator.run(steps_per_int)
 
     E = system.analysis.energy()
     e_pot = (E['total'] - E['kinetic']) / len(system.part)
