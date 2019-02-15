@@ -6,7 +6,6 @@ import espressomd
 from espressomd.io.writer import h5md
 import MDAnalysis as mda
 
-
 def write_data(file_name, time, energy, n_part):
     with open(file_name, 'a') as f:
         e = energy['total'] / n_part
